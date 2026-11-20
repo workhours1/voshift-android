@@ -24,9 +24,16 @@ jobs:
         run: |
           mkdir -p ~/.bubblewrap
           echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_HOME\"}" > ~/.bubblewrap/config.json
-          yes | bubblewrap update --skipVersionUpgrade
-          yes | bubblewrap build --skipPwaValidation
-          ls -la *.apk *.aab
+          yes | bubblewrap update --skipVersionUpgrade || true
+          ls
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleRelease bundleRelease
+          BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
+          $BT/zipalign -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk aligned.apk
+          $BT/apksigner sign --ks voshift-release.keystore --ks-key-alias voshift --ks-pass env:BUBBLEWRAP_KEYSTORE_PASSWORD --key-pass env:BUBBLEWRAP_KEY_PASSWORD --out app-release-signed.apk aligned.apk
+          cp app/build/outputs/bundle/release/app-release.aab app-release-bundle.aab
+          jarsigner -keystore voshift-release.keystore -storepass "$BUBBLEWRAP_KEYSTORE_PASSWORD" -keypass "$BUBBLEWRAP_KEY_PASSWORD" app-release-bundle.aab voshift
+          $BT/apksigner verify --print-certs app-release-signed.apk | head -5
       - uses: actions/upload-artifact@v4
         with:
           name: voshift-android

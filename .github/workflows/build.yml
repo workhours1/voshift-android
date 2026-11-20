@@ -16,7 +16,9 @@ jobs:
           java-version: '17'
       - run: npm i -g @bubblewrap/cli
       - name: Restore keystore
-        run: echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > voshift-release.keystore
+        run: |
+          printf "%s" "${{ secrets.KEYSTORE_B64 }}" | tr -d " \r\n" | base64 -d > voshift-release.keystore
+          echo "size=$(stat -c %s voshift-release.keystore) sha=$(sha256sum voshift-release.keystore | cut -c1-16) b64len=$(printf "%s" "${{ secrets.KEYSTORE_B64 }}" | wc -c)"
       - name: Build
         env:
           BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}

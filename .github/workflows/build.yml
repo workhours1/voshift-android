@@ -3,6 +3,8 @@ on:
   workflow_dispatch: {}
   push:
     branches: [main]
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,3 +34,9 @@ jobs:
           path: |
             app-release-signed.apk
             app-release-bundle.aab
+      - name: Publish to dist branch
+        run: |
+          mkdir -p /tmp/out && cp app-release-signed.apk /tmp/out/voshift.apk && cp app-release-bundle.aab /tmp/out/voshift.aab
+          git config user.name VOSHIFT && git config user.email voshift@gmail.com
+          git checkout --orphan dist && git rm -rf . -q && cp /tmp/out/* . && git add voshift.apk voshift.aab
+          git commit -m "build ${{ github.run_number }}" && git push -f origin dist

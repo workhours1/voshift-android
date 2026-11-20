@@ -14,7 +14,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
       - run: npm i -g @bubblewrap/cli
       - name: Restore keystore
         run: echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > voshift-release.keystore

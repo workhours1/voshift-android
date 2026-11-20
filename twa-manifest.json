@@ -22,5 +22,5 @@
   "enableSiteSettingsShortcut": true,
   "orientation": "portrait",
   "fingerprints": [],
-  "minSdkVersion": 21
+  "minSdkVersion": 24
 }
